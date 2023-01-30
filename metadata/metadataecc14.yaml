@@ -1,0 +1,31 @@
+# YAML Document starts with ---
+# Comments start with #
+---
+  - system: ecc14
+    tablename: customer
+    sourcepath: abfss://ecc14@dltstoragehk.dfs.core.windows.net/table1
+    target_bronze: abfss://bronze@dltstoragehk.dfs.core.windows.net/
+    target_silver: abfss://silver@dltstoragehk.dfs.core.windows.net/
+    keyfields: [FlightDate,Tail_Number]
+    sequenceby: FlightDate
+  - system: ecc14
+    tablename: address
+    sourcepath: abfss://ecc14@dltstoragehk.dfs.core.windows.net/table2
+    target_bronze: abfss://bronze@dltstoragehk.dfs.core.windows.net/
+    target_silver: abfss://silver@dltstoragehk.dfs.core.windows.net/
+    keyfields: [FlightDate,Tail_Number]
+    sequenceby: FlightDate
+  - system: ecc14
+    tablename: sales
+    sourcepath: abfss://ecc14@dltstoragehk.dfs.core.windows.net/table3
+    target_bronze: abfss://bronze@dltstoragehk.dfs.core.windows.net/
+    target_silver: abfss://silver@dltstoragehk.dfs.core.windows.net/
+    keyfields: [FlightDate,Tail_Number]
+    sequenceby: FlightDate
+  - system: ecc14
+    tablename: product
+    sourcepath: abfss://ecc14@dltstoragehk.dfs.core.windows.net/table4
+    target_bronze: abfss://bronze@dltstoragehk.dfs.core.windows.net/
+    target_silver: abfss://silver@dltstoragehk.dfs.core.windows.net/
+    keyfields: [FlightDate,Tail_Number]
+    sequenceby: FlightDate

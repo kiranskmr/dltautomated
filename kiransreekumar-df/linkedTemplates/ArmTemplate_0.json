@@ -1,0 +1,1137 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "kiransreekumar-df"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dltstoragehk.dfs.core.windows.net/"
+		},
+		"trigger1_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/3f2e4d32-8e8d-46d6-82bc-5bb8d962328b/resourceGroups/kiran-azure-devops-rg/providers/Microsoft.Storage/storageAccounts/dltstoragehk"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Run Job')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Jobs API",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@concat('https://',pipeline().parameters.DatabricksWorkspaceID,'.azuredatabricks.net/api/2.1/jobs/run-now')",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {},
+							"body": {
+								"value": "@concat('{\"job_id\":',pipeline().parameters.JobID,'}')",
+								"type": "Expression"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
+							}
+						}
+					},
+					{
+						"name": "Until1",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "Execute Jobs API",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@not(equals(variables('JobStatus'),'Running'))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Check Job Run API",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@concat('https://',pipeline().parameters.DatabricksWorkspaceID,'.azuredatabricks.net/api/2.1/jobs/runs/get?run_id=',activity('Execute Jobs API').output.run_id)",
+											"type": "Expression"
+										},
+										"method": "GET",
+										"headers": {},
+										"authentication": {
+											"type": "MSI",
+											"resource": "2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
+										}
+									}
+								},
+								{
+									"name": "Set Job Status",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Check Job Run API",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "jobStatus",
+										"value": {
+											"value": "@if(\nor(\nequals(activity('Check Job Run API').output.state.life_cycle_state, 'PENDING'), equals(activity('Check Job Run API').output.state.life_cycle_state, 'RUNNING')\n),\n'Running',\nactivity('Check Job Run API').output.state.result_state\n)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Wait to Recheck API",
+									"type": "Wait",
+									"dependsOn": [
+										{
+											"activity": "Set Job Status",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": {
+											"value": "@pipeline().parameters.WaitSeconds",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"timeout": "0.12:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"jobId": {
+						"type": "string"
+					},
+					"DatabricksWorkspaceID": {
+						"type": "string"
+					},
+					"WaitSeconds": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"jobStatus": {
+						"type": "String",
+						"defaultValue": "Running"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-23T21:47:16Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLake",
+				"typeProperties": {
+					"domain": "https://adb-984752964297111.11.azuredatabricks.net",
+					"clusterId": "1122-170237-2ozpg228",
+					"workspaceResourceId": "/subscriptions/3f2e4d32-8e8d-46d6-82bc-5bb8d962328b/resourceGroups/field-eng-east/providers/Microsoft.Databricks/workspaces/field-eng-east"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Execute Databricks Job')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline1",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Run Job",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobId": "796104578175513",
+								"DatabricksWorkspaceID": "adb-984752964297111.11",
+								"WaitSeconds": 30
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-24T12:54:59Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Run Job')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "On_Time_Reporting_Carrier.csv",
+						"fileSystem": "tempdata"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "",
+					"firstRowAsHeader": true,
+					"quoteChar": ""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "On_Time_Reporting_Carrier.csv",
+						"fileSystem": "tempdata"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceDataset_2zw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "On_Time_Reporting_Carrier.csv",
+						"fileSystem": "tempdata"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Year",
+						"type": "String"
+					},
+					{
+						"name": "Quarter",
+						"type": "String"
+					},
+					{
+						"name": "Month",
+						"type": "String"
+					},
+					{
+						"name": "DayofMonth",
+						"type": "String"
+					},
+					{
+						"name": "DayOfWeek",
+						"type": "String"
+					},
+					{
+						"name": "FlightDate",
+						"type": "String"
+					},
+					{
+						"name": "Reporting_Airline",
+						"type": "String"
+					},
+					{
+						"name": "DOT_ID_Reporting_Airline",
+						"type": "String"
+					},
+					{
+						"name": "IATA_CODE_Reporting_Airline",
+						"type": "String"
+					},
+					{
+						"name": "Tail_Number",
+						"type": "String"
+					},
+					{
+						"name": "Flight_Number_Reporting_Airline",
+						"type": "String"
+					},
+					{
+						"name": "OriginAirportID",
+						"type": "String"
+					},
+					{
+						"name": "OriginAirportSeqID",
+						"type": "String"
+					},
+					{
+						"name": "OriginCityMarketID",
+						"type": "String"
+					},
+					{
+						"name": "Origin",
+						"type": "String"
+					},
+					{
+						"name": "OriginCityName",
+						"type": "String"
+					},
+					{
+						"name": "OriginState",
+						"type": "String"
+					},
+					{
+						"name": "OriginStateFips",
+						"type": "String"
+					},
+					{
+						"name": "OriginStateName",
+						"type": "String"
+					},
+					{
+						"name": "OriginWac",
+						"type": "String"
+					},
+					{
+						"name": "DestAirportID",
+						"type": "String"
+					},
+					{
+						"name": "DestAirportSeqID",
+						"type": "String"
+					},
+					{
+						"name": "DestCityMarketID",
+						"type": "String"
+					},
+					{
+						"name": "Dest",
+						"type": "String"
+					},
+					{
+						"name": "DestCityName",
+						"type": "String"
+					},
+					{
+						"name": "DestState",
+						"type": "String"
+					},
+					{
+						"name": "DestStateFips",
+						"type": "String"
+					},
+					{
+						"name": "DestStateName",
+						"type": "String"
+					},
+					{
+						"name": "DestWac",
+						"type": "String"
+					},
+					{
+						"name": "CRSDepTime",
+						"type": "String"
+					},
+					{
+						"name": "DepTime",
+						"type": "String"
+					},
+					{
+						"name": "DepDelay",
+						"type": "String"
+					},
+					{
+						"name": "DepDelayMinutes",
+						"type": "String"
+					},
+					{
+						"name": "DepDel15",
+						"type": "String"
+					},
+					{
+						"name": "DepartureDelayGroups",
+						"type": "String"
+					},
+					{
+						"name": "DepTimeBlk",
+						"type": "String"
+					},
+					{
+						"name": "TaxiOut",
+						"type": "String"
+					},
+					{
+						"name": "WheelsOff",
+						"type": "String"
+					},
+					{
+						"name": "WheelsOn",
+						"type": "String"
+					},
+					{
+						"name": "TaxiIn",
+						"type": "String"
+					},
+					{
+						"name": "CRSArrTime",
+						"type": "String"
+					},
+					{
+						"name": "ArrTime",
+						"type": "String"
+					},
+					{
+						"name": "ArrDelay",
+						"type": "String"
+					},
+					{
+						"name": "ArrDelayMinutes",
+						"type": "String"
+					},
+					{
+						"name": "ArrDel15",
+						"type": "String"
+					},
+					{
+						"name": "ArrivalDelayGroups",
+						"type": "String"
+					},
+					{
+						"name": "ArrTimeBlk",
+						"type": "String"
+					},
+					{
+						"name": "Cancelled",
+						"type": "String"
+					},
+					{
+						"name": "CancellationCode",
+						"type": "String"
+					},
+					{
+						"name": "Diverted",
+						"type": "String"
+					},
+					{
+						"name": "CRSElapsedTime",
+						"type": "String"
+					},
+					{
+						"name": "ActualElapsedTime",
+						"type": "String"
+					},
+					{
+						"name": "AirTime",
+						"type": "String"
+					},
+					{
+						"name": "Flights",
+						"type": "String"
+					},
+					{
+						"name": "Distance",
+						"type": "String"
+					},
+					{
+						"name": "DistanceGroup",
+						"type": "String"
+					},
+					{
+						"name": "CarrierDelay",
+						"type": "String"
+					},
+					{
+						"name": "WeatherDelay",
+						"type": "String"
+					},
+					{
+						"name": "NASDelay",
+						"type": "String"
+					},
+					{
+						"name": "SecurityDelay",
+						"type": "String"
+					},
+					{
+						"name": "LateAircraftDelay",
+						"type": "String"
+					},
+					{
+						"name": "FirstDepTime",
+						"type": "String"
+					},
+					{
+						"name": "TotalAddGTime",
+						"type": "String"
+					},
+					{
+						"name": "LongestAddGTime",
+						"type": "String"
+					},
+					{
+						"name": "DivAirportLandings",
+						"type": "String"
+					},
+					{
+						"name": "DivReachedDest",
+						"type": "String"
+					},
+					{
+						"name": "DivActualElapsedTime",
+						"type": "String"
+					},
+					{
+						"name": "DivArrDelay",
+						"type": "String"
+					},
+					{
+						"name": "DivDistance",
+						"type": "String"
+					},
+					{
+						"name": "Div1Airport",
+						"type": "String"
+					},
+					{
+						"name": "Div1AirportID",
+						"type": "String"
+					},
+					{
+						"name": "Div1AirportSeqID",
+						"type": "String"
+					},
+					{
+						"name": "Div1WheelsOn",
+						"type": "String"
+					},
+					{
+						"name": "Div1TotalGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div1LongestGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div1WheelsOff",
+						"type": "String"
+					},
+					{
+						"name": "Div1TailNum",
+						"type": "String"
+					},
+					{
+						"name": "Div2Airport",
+						"type": "String"
+					},
+					{
+						"name": "Div2AirportID",
+						"type": "String"
+					},
+					{
+						"name": "Div2AirportSeqID",
+						"type": "String"
+					},
+					{
+						"name": "Div2WheelsOn",
+						"type": "String"
+					},
+					{
+						"name": "Div2TotalGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div2LongestGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div2WheelsOff",
+						"type": "String"
+					},
+					{
+						"name": "Div2TailNum",
+						"type": "String"
+					},
+					{
+						"name": "Div3Airport",
+						"type": "String"
+					},
+					{
+						"name": "Div3AirportID",
+						"type": "String"
+					},
+					{
+						"name": "Div3AirportSeqID",
+						"type": "String"
+					},
+					{
+						"name": "Div3WheelsOn",
+						"type": "String"
+					},
+					{
+						"name": "Div3TotalGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div3LongestGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div3WheelsOff",
+						"type": "String"
+					},
+					{
+						"name": "Div3TailNum",
+						"type": "String"
+					},
+					{
+						"name": "Div4Airport",
+						"type": "String"
+					},
+					{
+						"name": "Div4AirportID",
+						"type": "String"
+					},
+					{
+						"name": "Div4AirportSeqID",
+						"type": "String"
+					},
+					{
+						"name": "Div4WheelsOn",
+						"type": "String"
+					},
+					{
+						"name": "Div4TotalGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div4LongestGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div4WheelsOff",
+						"type": "String"
+					},
+					{
+						"name": "Div4TailNum",
+						"type": "String"
+					},
+					{
+						"name": "Div5Airport",
+						"type": "String"
+					},
+					{
+						"name": "Div5AirportID",
+						"type": "String"
+					},
+					{
+						"name": "Div5AirportSeqID",
+						"type": "String"
+					},
+					{
+						"name": "Div5WheelsOn",
+						"type": "String"
+					},
+					{
+						"name": "Div5TotalGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div5LongestGTime",
+						"type": "String"
+					},
+					{
+						"name": "Div5WheelsOff",
+						"type": "String"
+					},
+					{
+						"name": "Div5TailNum",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/table1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(replace('On_Time_Reporting_Carrier','.csv',''), '_', formatDateTime(convertTimeZone(utcnow(),'UTC','Eastern Standard Time'),'yyyy-MM-ddTHHmmss'), '.csv')\n",
+							"type": "Expression"
+						},
+						"folderPath": "table1",
+						"fileSystem": "ecc14"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/table2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(replace('On_Time_Reporting_Carrier','.csv',''), '_', formatDateTime(convertTimeZone(utcnow(),'UTC','Eastern Standard Time'),'yyyy-MM-ddTHHmmss'), '.csv')\n",
+							"type": "Expression"
+						},
+						"folderPath": "table2",
+						"fileSystem": "ecc14"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/table3')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(replace('On_Time_Reporting_Carrier','.csv',''), '_', formatDateTime(convertTimeZone(utcnow(),'UTC','Eastern Standard Time'),'yyyy-MM-ddTHHmmss'), '.csv')\n",
+							"type": "Expression"
+						},
+						"folderPath": "table3",
+						"fileSystem": "ecc14"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/table4')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(replace('On_Time_Reporting_Carrier','.csv',''), '_', formatDateTime(convertTimeZone(utcnow(),'UTC','Eastern Standard Time'),'yyyy-MM-ddTHHmmss'), '.csv')\n",
+							"type": "Expression"
+						},
+						"folderPath": "table4",
+						"fileSystem": "ecc14"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copy_data')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "table1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "tempdata//On_Time_Reporting_Carrier.csv"
+							},
+							{
+								"name": "Destination",
+								"value": "ecc14/table1/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "table1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "table2",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "tempdata//On_Time_Reporting_Carrier.csv"
+							},
+							{
+								"name": "Destination",
+								"value": "ecc14/table1/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "table2",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "table3",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "tempdata//On_Time_Reporting_Carrier.csv"
+							},
+							{
+								"name": "Destination",
+								"value": "ecc14/table1/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "table3",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "table4",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "tempdata//On_Time_Reporting_Carrier.csv"
+							},
+							{
+								"name": "Destination",
+								"value": "ecc14/table1/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "table4",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-24T13:51:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Source')]",
+				"[concat(variables('factoryId'), '/datasets/table1')]",
+				"[concat(variables('factoryId'), '/datasets/table2')]",
+				"[concat(variables('factoryId'), '/datasets/table3')]",
+				"[concat(variables('factoryId'), '/datasets/table4')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Execute Databricks Job",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/ecc14/blobs/table4",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('trigger1_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Execute Databricks Job')]"
+			]
+		}
+	]
+}

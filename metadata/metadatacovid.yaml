@@ -1,0 +1,195 @@
+# YAML Document starts with ---
+# Comments start with #
+---
+  - system: covid19
+    tablename: ct-uc-covid-test
+    sourcepath: abfss://ct-uc-covid-tests@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby: 
+  - system: covid19
+    tablename: databank-demographics
+    sourcepath: abfss://databank-demographics@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby: 
+  - system: covid19
+    tablename: goog-global-mobility-report
+    sourcepath: abfss://goog-global-mobility-report@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby: 
+    - system: covid19
+    tablename: hdx-acaps
+    sourcepath: abfss://hdx-acaps@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: hs-bulk-data
+    sourcepath: abfss://hs-bulk-data@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: hum-restrictions-airline
+    sourcepath: abfss://hum-restrictions-airline@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: hum-restrictions-country
+    sourcepath: abfss://hum-restrictions-country@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: ihme-covid-19
+    sourcepath: abfss://ihme-covid-19@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: jhu-covid-19
+    sourcepath: abfss://jhu-covid-19@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: kff-hcp-capacity
+    sourcepath: abfss://kff-hcp-capacity@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: kff-us-icu-beds
+    sourcepath: abfss://kff-us-icu-beds@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: kff-us-policy-actions
+    sourcepath: abfss://kff-us-policy-actions@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: kff-us-state-mitigations
+    sourcepath: abfss://kff-us-state-mitigations@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: metadata
+    sourcepath: abfss://metadata@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: nyc-health-tests
+    sourcepath: abfss://nyc-health-tests@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: nyt-us-covid19
+    sourcepath: abfss://nyt-us-covid19@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: pcm-dps-covid19
+    sourcepath: abfss://pcm-dps-covid19@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: pcm-dps-covid19-details
+    sourcepath: abfss://pcm-dps-covid19-details@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: rki-ger-covid19-dashboard
+    sourcepath: abfss://rki-ger-covid19-dashboard@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: scs-be-detailed-hospitalisations
+    sourcepath: abfss://scs-be-detailed-hospitalisations@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: scs-be-detailed-mortality
+    sourcepath: abfss://scs-be-detailed-mortality@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: scs-be-detailed-province-case-counts
+    sourcepath: abfss://scs-be-detailed-province-case-counts@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: scs-be-detailed-tests
+    sourcepath: abfss://scs-be-detailed-tests@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:
+  - system: covid19
+    tablename: who-situation-reports
+    sourcepath: abfss://who-situation-reports@coviddatadlt.dfs.core.windows.net/
+    target_bronze: abfss://bronze@coviddatadlt.dfs.core.windows.net/
+    target_silver: abfss://silver@coviddatadlt.dfs.core.windows.net/
+    fullload: true
+    keyfields: []
+    sequenceby:

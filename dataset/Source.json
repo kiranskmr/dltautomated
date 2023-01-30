@@ -1,0 +1,19 @@
+{
+	"name": "Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "On_Time_Reporting_Carrier.csv",
+				"fileSystem": "tempdata"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

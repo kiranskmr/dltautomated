@@ -1,0 +1,9 @@
+{
+	"name": "kiransreekumar-df",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "9613295f-9f63-440a-9e2d-dcf2aa0d9fe3",
+		"tenantId": "9f37a392-f0ae-4280-9796-f1864a10effc"
+	}
+}

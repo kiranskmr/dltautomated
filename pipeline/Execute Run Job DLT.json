@@ -1,0 +1,61 @@
+{
+	"name": "Execute Run Job DLT",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Pipeline1",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Fetch jobID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Run Job DLT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"jobId": {
+							"value": "@activity('Fetch jobID').output.runOutput",
+							"type": "Expression"
+						},
+						"DatabricksWorkspaceID": "adb-984752964297111.11",
+						"WaitSeconds": 30
+					}
+				}
+			},
+			{
+				"name": "Fetch jobID",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/kiran.sreekumar@databricks.com/hei/fetch_jobID",
+					"baseParameters": {
+						"system": "ecc10"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDB",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-01-24T12:54:59Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,33 @@
+{
+	"name": "Register Source",
+	"properties": {
+		"activities": [
+			{
+				"name": "Register Source",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/kiran.sreekumar@databricks.com/hei/dlt_api",
+					"baseParameters": {
+						"configlocation": "/Workspace/Repos/kiran.sreekumar@databricks.com/dltauto/metadata/metadataecc14.yaml",
+						"system": "ecc10",
+						"pool": "1207-120054-bean4-pool-eoo0gntr"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDB",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
