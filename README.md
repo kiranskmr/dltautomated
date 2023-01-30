@@ -1,2 +1,1 @@
-# dltautomated
-dltautomated
+Initialized by Azure Data Factory!
