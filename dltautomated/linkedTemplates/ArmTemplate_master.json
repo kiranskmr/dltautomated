@@ -23,6 +23,10 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/3f2e4d32-8e8d-46d6-82bc-5bb8d962328b/resourceGroups/kiran-azure-devops-rg/providers/Microsoft.Storage/storageAccounts/dltstoragehk"
 		},
+		"fileArrival_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/3f2e4d32-8e8d-46d6-82bc-5bb8d962328b/resourceGroups/kiran-azure-devops-rg/providers/Microsoft.Storage/storageAccounts/coviddatadlt"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -61,6 +65,9 @@
 					},
 					"trigger1_properties_typeProperties_scope": {
 						"value": "[parameters('trigger1_properties_typeProperties_scope')]"
+					},
+					"fileArrival_properties_typeProperties_scope": {
+						"value": "[parameters('fileArrival_properties_typeProperties_scope')]"
 					}
 				}
 			},
