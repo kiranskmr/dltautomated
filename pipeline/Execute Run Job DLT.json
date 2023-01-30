@@ -43,9 +43,9 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Users/kiran.sreekumar@databricks.com/hei/fetch_jobID",
+					"notebookPath": "/Users/kiran.sreekumar@databricks.com/dltauto/DLT-Ingest-data",
 					"baseParameters": {
-						"system": "ecc10"
+						"system": "covid_dataset"
 					}
 				},
 				"linkedServiceName": {
