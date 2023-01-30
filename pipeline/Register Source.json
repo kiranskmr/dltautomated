@@ -19,7 +19,8 @@
 					"baseParameters": {
 						"configlocation": "/Workspace/Repos/kiran.sreekumar@databricks.com/dltauto/metadata/metadataecc14.yaml",
 						"system": "ecc10",
-						"pool": "1207-120054-bean4-pool-eoo0gntr"
+						"pool": "1207-120054-bean4-pool-eoo0gntr",
+						"host": "https://adb-984752964297111.11.azuredatabricks.net"
 					}
 				},
 				"linkedServiceName": {
