@@ -1,0 +1,17 @@
+{
+	"name": "triggersink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "coviddatadlt",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "trigger"
+			}
+		}
+	}
+}
