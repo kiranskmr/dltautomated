@@ -113,9 +113,9 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"notebookPath": "/Workspace/Repos/kiran.sreekumar@databricks.com/dltauto/metadata/metadatacovid.yaml",
+							"notebookPath": "/Users/kiran.sreekumar@databricks.com/dltauto/dlt_register_source",
 							"baseParameters": {
-								"configlocation": "/Workspace/Repos/kiran.sreekumar@databricks.com/dltauto/metadata/metadataecc14.yaml",
+								"configlocation": "/Workspace/Repos/kiran.sreekumar@databricks.com/dltauto/metadata/metadatacovid.yaml",
 								"system": "covid_dataset",
 								"host": "https://adb-984752964297111.11.azuredatabricks.net"
 							}
