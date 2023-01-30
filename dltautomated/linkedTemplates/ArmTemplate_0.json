@@ -305,7 +305,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"notebookPath": "/Users/kiran.sreekumar@databricks.com/hei/dlt_api",
+							"notebookPath": "/Workspace/Repos/kiran.sreekumar@databricks.com/dltauto/metadata/metadatacovid.yaml",
 							"baseParameters": {
 								"configlocation": "/Workspace/Repos/kiran.sreekumar@databricks.com/dltauto/metadata/metadataecc14.yaml",
 								"system": "covid_dataset",
