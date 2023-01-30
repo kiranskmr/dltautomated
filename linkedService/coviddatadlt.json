@@ -1,0 +1,10 @@
+{
+	"name": "coviddatadlt",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://coviddatadlt.dfs.core.windows.net/"
+		}
+	}
+}
